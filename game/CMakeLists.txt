@@ -5,11 +5,23 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(GBA_ARCH "-mthumb-interwork -mthumb")
-set(GBA_SPECS "-specs=gba.specs")
+set(GBA_FLAGS "\
+    -mthumb-interwork\
+    -mthumb\
+    -mcpu=arm7tdmi\
+    -mtune=arm7tdmi\
+    -specs=gba.specs")
 
-set(CMAKE_C_FLAGS "${GBA_ARCH} ${GBA_SPECS} -O2 -Wall -fno-strict-aliasing")
-set(CMAKE_CXX_FLAGS "${GBA_ARCH} ${GBA_SPECS} -O2 -Wall -fno-strict-aliasing")
+set(CMAKE_C_FLAGS "\
+    ${GBA_FLAGS}\
+    -Wall\
+    -ffast-math\
+    -fno-strict-aliasing")
+
+set(CMAKE_CXX_FLAGS "\
+    ${CMAKE_C_FLAGS}\
+    -fno-rtti\
+    -fno-exceptions")
 
 set(CMAKE_C_COMPILER "${DEVKITARM_PATH}/bin/arm-none-eabi-gcc")
 set(CMAKE_CXX_COMPILER "${DEVKITARM_PATH}/bin/arm-none-eabi-g++")
@@ -19,7 +31,7 @@ set(CMAKE_CXX_COMPILER "${DEVKITARM_PATH}/bin/arm-none-eabi-g++")
 #
 
 add_executable(${PROJECT_NAME}.elf
-    main.c)
+    main.cpp)
 
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES
     CXX_STANDARD 17
