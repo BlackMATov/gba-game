@@ -15,6 +15,7 @@ set(GBA_FLAGS "\
 set(CMAKE_C_FLAGS "\
     ${GBA_FLAGS}\
     -Wall\
+    -Wextra\
     -ffast-math\
     -fno-strict-aliasing")
 

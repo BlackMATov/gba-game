@@ -17,14 +17,7 @@ namespace
     } s_core_state;
 
     inline volatile u32& s_reg_dispcnt = *(raw::io32 + 0x0000);
-}
-
-namespace gbe
-{
-    void initialize() noexcept {
-        core::change_mode(s_core_state.mode);
-        core::change_layers(s_core_state.layers);
-    }
+    inline volatile u32& s_reg_dispstat = *(raw::io32 + 0x0004);
 }
 
 namespace gbe::gfx
@@ -32,16 +25,30 @@ namespace gbe::gfx
     void m3_plot(u32 x, u32 y, u16 c) noexcept {
         assert(s_core_state.mode == core::mode_3);
         assert(x < screen_width && y < screen_height);
-        raw::vram16[x * screen_width + y] = c;
+        raw::vram16[y * screen_width + x] = c;
     }
 
     void m3_plot(u32 x, u32 y, color c) noexcept {
         m3_plot(x, y, static_cast<u16>(c));
     }
+
+    void vsync() noexcept {
+        while(vcount() >= 160) {} // wait till VDraw
+        while(vcount() < 160) {}  // wait till VBlank
+    }
+
+    u32 vcount() noexcept {
+        return *(raw::io16 + 0x0006);
+    }
 }
 
 namespace gbe::core
 {
+    void initialize() noexcept {
+        change_mode(s_core_state.mode);
+        change_layers(s_core_state.layers);
+    }
+
     void change_mode(u32 mode) noexcept {
         s_core_state.mode = mode;
         s_reg_dispcnt = mode | s_core_state.layers;

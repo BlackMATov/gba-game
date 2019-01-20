@@ -1,15 +1,30 @@
 #include "gbe.hpp"
+using namespace gbe;
 
-int main()
+namespace
 {
-    gbe::initialize();
+    u32 s_rnd_u32_seed = 0;
 
-    gbe::gfx::m3_plot(10, 10, gbe::color::red);
-    gbe::gfx::m3_plot(20, 10, gbe::color::green);
-    gbe::gfx::m3_plot(10, 20, gbe::color::blue);
-
-    while(true) {
+    // range: (l, r>
+    u32 rnd_u32(u32 l, u32 r) noexcept {
+        s_rnd_u32_seed = 214013u * s_rnd_u32_seed + 2531011u;
+        return l + (s_rnd_u32_seed ^ s_rnd_u32_seed >> 15) % (r - l);
     }
 
-    return 0;
+    // range: (0, r>
+    u32 rnd_u32(u32 r) noexcept {
+        return rnd_u32(0u, r);
+    }
+}
+
+int main() noexcept
+{
+    core::initialize();
+
+    while(true) {
+        gfx::m3_plot(
+            rnd_u32(gfx::screen_width),
+            rnd_u32(gfx::screen_height),
+            make_rgb15(rnd_u32(32u), rnd_u32(32u), rnd_u32(32u)));
+    }
 }

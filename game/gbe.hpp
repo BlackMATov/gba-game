@@ -32,27 +32,64 @@ namespace gbe
     }
 
     enum class color : u16 {
-        red = make_rgb15(31, 0, 0),
-        green = make_rgb15(0, 31, 0),
-        blue = make_rgb15(0, 0, 31)
+        black   = make_rgb15( 0,  0,  0),
+        white   = make_rgb15(31, 31, 31),
+        red     = make_rgb15(31,  0,  0),
+        green   = make_rgb15( 0, 31,  0),
+        blue    = make_rgb15( 0,  0, 31),
+        yellow  = make_rgb15(31, 31,  0),
+        magenta = make_rgb15(31,  0, 31),
+        cyan    = make_rgb15( 0, 31, 31)
     };
-
-    void initialize() noexcept;
 }
 
 namespace gbe::raw
 {
+    inline volatile u16* io16 = reinterpret_cast<u16*>(0x04000000);
     inline volatile u32* io32 = reinterpret_cast<u32*>(0x04000000);
     inline volatile u16* vram16 = reinterpret_cast<u16*>(0x06000000);
 }
 
 namespace gbe::gfx
 {
-    inline u32 screen_width = 240;
-    inline u32 screen_height = 160;
+    // .------------------------------------.
+    // | subject  | length         | cycles |
+    // |------------------------------------|
+    // | pixel    | 1              | 4      |
+    // | HDraw    | 240px          | 960    |
+    // | HBlank   | 68px           | 272    |
+    // | scanline | Hdraw + Hbl    | 1232   |
+    // | VDraw    | 160 * scanline | 197120 |
+    // | VBlank   | 68 * scanline  | 83776  |
+    // | refresh  | VDraw + Vbl    | 280896 |
+    // `------------------------------------`
+
+    inline u32 screen_width = 240u;
+    inline u32 screen_height = 160u;
 
     void m3_plot(u32 x, u32 y, u16 c) noexcept;
     void m3_plot(u32 x, u32 y, color c) noexcept;
+
+    void vsync() noexcept;
+    u32 vcount() noexcept;
+}
+
+namespace gbe::math
+{
+    template < typename T >
+    inline T min(T l, T r) noexcept {
+        return l < r ? l : r;
+    }
+
+    template < typename T >
+    inline T max(T l, T r) noexcept {
+        return l < r ? r : l;
+    }
+
+    template < typename T >
+    inline T clamp(T v, T vmin, T vmax) noexcept {
+        return min(max(v, vmin), vmax);
+    }
 }
 
 namespace gbe::core
@@ -74,6 +111,7 @@ namespace gbe::core
         layer_obj = 0x1000
     };
 
+    void initialize() noexcept;
     void change_mode(u32 mode) noexcept;
     void change_layers(u32 layers) noexcept;
 }
