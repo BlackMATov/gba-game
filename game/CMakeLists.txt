@@ -31,6 +31,8 @@ set(CMAKE_CXX_COMPILER "${DEVKITARM_PATH}/bin/arm-none-eabi-g++")
 #
 
 add_executable(${PROJECT_NAME}.elf
+    gbe.hpp
+    gbe.cpp
     main.cpp)
 
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES

@@ -1,16 +1,15 @@
-/*******************************************************************************
- * This file is part of the "https://github.com/BlackMATov/gba-game"
- * For conditions of distribution and use, see copyright notice in LICENSE.md
- * Copyright (C) 2019 Matvey Cherevko
- ******************************************************************************/
+#include "gbe.hpp"
 
-int main() {
-    *(unsigned int*)0x04000000 = 0x0403;
+int main()
+{
+    gbe::initialize();
 
-    ((unsigned short*)0x06000000)[120+80*240] = 0x001F;
-    ((unsigned short*)0x06000000)[136+80*240] = 0x03E0;
-    ((unsigned short*)0x06000000)[120+96*240] = 0x7C00;
+    gbe::gfx::m3_plot(10, 10, gbe::color::red);
+    gbe::gfx::m3_plot(20, 10, gbe::color::green);
+    gbe::gfx::m3_plot(10, 20, gbe::color::blue);
 
-    while(1);
+    while(true) {
+    }
+
     return 0;
 }
