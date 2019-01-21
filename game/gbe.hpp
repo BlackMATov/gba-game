@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 #include <cstdint>
+#include <cstddef>
 
 namespace gbe
 {
@@ -31,23 +32,31 @@ namespace gbe
         return static_cast<u16>(r | (g << 5) | (b << 10));
     }
 
-    enum class color : u16 {
-        black   = make_rgb15( 0,  0,  0),
-        white   = make_rgb15(31, 31, 31),
-        red     = make_rgb15(31,  0,  0),
-        green   = make_rgb15( 0, 31,  0),
-        blue    = make_rgb15( 0,  0, 31),
-        yellow  = make_rgb15(31, 31,  0),
-        magenta = make_rgb15(31,  0, 31),
-        cyan    = make_rgb15( 0, 31, 31)
+    enum color : u16 {
+        color_black   = make_rgb15( 0,  0,  0),
+        color_white   = make_rgb15(31, 31, 31),
+        color_red     = make_rgb15(31,  0,  0),
+        color_green   = make_rgb15( 0, 31,  0),
+        color_blue    = make_rgb15( 0,  0, 31),
+        color_yellow  = make_rgb15(31, 31,  0),
+        color_magenta = make_rgb15(31,  0, 31),
+        color_cyan    = make_rgb15( 0, 31, 31)
     };
 }
 
 namespace gbe::raw
 {
-    inline volatile u16* io16 = reinterpret_cast<u16*>(0x04000000);
-    inline volatile u32* io32 = reinterpret_cast<u32*>(0x04000000);
-    inline volatile u16* vram16 = reinterpret_cast<u16*>(0x06000000);
+    inline volatile u16* io16(std::size_t offset = 0u) noexcept {
+        return reinterpret_cast<u16*>(0x04000000 + offset);
+    }
+
+    inline volatile u32* io32(std::size_t offset = 0u) noexcept {
+        return reinterpret_cast<u32*>(0x04000000 + offset);
+    }
+
+    inline volatile u16* vram16(std::size_t offset = 0u) noexcept {
+        return reinterpret_cast<u16*>(0x06000000 + offset);
+    }
 }
 
 namespace gbe::gfx
@@ -68,7 +77,6 @@ namespace gbe::gfx
     inline u32 screen_height = 160u;
 
     void m3_plot(u32 x, u32 y, u16 c) noexcept;
-    void m3_plot(u32 x, u32 y, color c) noexcept;
 
     void vsync() noexcept;
     u32 vcount() noexcept;
@@ -114,4 +122,28 @@ namespace gbe::core
     void initialize() noexcept;
     void change_mode(u32 mode) noexcept;
     void change_layers(u32 layers) noexcept;
+}
+
+namespace gbe::input
+{
+    enum keys : u32 {
+        key_a      = 0x0001,
+        key_b      = 0x0002,
+        key_select = 0x0004,
+        key_start  = 0x0008,
+        key_right  = 0x0010,
+        key_left   = 0x0020,
+        key_up     = 0x0040,
+        key_down   = 0x0080,
+        key_r      = 0x0100,
+        key_l      = 0x0200
+    };
+
+    void poll() noexcept;
+
+    bool is_pressed(u32 k) noexcept;
+    bool is_released(u32 k) noexcept;
+
+    bool is_just_pressed(u32 k) noexcept;
+    bool is_just_released(u32 k) noexcept;
 }

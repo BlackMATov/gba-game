@@ -16,8 +16,13 @@ namespace
         u32 layers = core::layer_bg2;
     } s_core_state;
 
-    inline volatile u32& s_reg_dispcnt = *(raw::io32 + 0x0000);
-    inline volatile u32& s_reg_dispstat = *(raw::io32 + 0x0004);
+    struct input_state_t {
+        u16 prev_keys = 0;
+        u16 curr_keys = 0;
+    } s_input_state;
+
+    inline volatile u32& s_reg_dispcnt = *(raw::io32(0x0000));
+    inline volatile u32& s_reg_dispstat = *(raw::io32(0x0004));
 }
 
 namespace gbe::gfx
@@ -25,11 +30,7 @@ namespace gbe::gfx
     void m3_plot(u32 x, u32 y, u16 c) noexcept {
         assert(s_core_state.mode == core::mode_3);
         assert(x < screen_width && y < screen_height);
-        raw::vram16[y * screen_width + x] = c;
-    }
-
-    void m3_plot(u32 x, u32 y, color c) noexcept {
-        m3_plot(x, y, static_cast<u16>(c));
+        raw::vram16()[y * screen_width + x] = c;
     }
 
     void vsync() noexcept {
@@ -38,7 +39,7 @@ namespace gbe::gfx
     }
 
     u32 vcount() noexcept {
-        return *(raw::io16 + 0x0006);
+        return *(raw::io16(0x0006));
     }
 }
 
@@ -57,5 +58,30 @@ namespace gbe::core
     void change_layers(u32 layers) noexcept {
         s_core_state.layers = layers;
         s_reg_dispcnt = s_core_state.mode | layers;
+    }
+}
+
+namespace gbe::input
+{
+    void poll() noexcept {
+        volatile u16& reg_key_input = *(raw::io16(0x0130));
+        s_input_state.prev_keys = s_input_state.curr_keys;
+        s_input_state.curr_keys = ~reg_key_input & 0x03FF;
+    }
+
+    bool is_pressed(u32 k) noexcept {
+        return s_input_state.curr_keys & k;
+    }
+
+    bool is_released(u32 k) noexcept {
+        return ~s_input_state.curr_keys & k;
+    }
+
+    bool is_just_pressed(u32 k) noexcept {
+        return (s_input_state.curr_keys & ~s_input_state.prev_keys) & k;
+    }
+
+    bool is_just_released(u32 k) noexcept {
+        return (~s_input_state.curr_keys & s_input_state.prev_keys) & k;
     }
 }

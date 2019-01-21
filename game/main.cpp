@@ -15,6 +15,11 @@ namespace
     u32 rnd_u32(u32 r) noexcept {
         return rnd_u32(0u, r);
     }
+
+    struct game_state_t {
+        u32 x = 0u;
+        u32 y = 0u;
+    } s_game_state;
 }
 
 int main() noexcept
@@ -22,9 +27,29 @@ int main() noexcept
     core::initialize();
 
     while(true) {
+        input::poll();
+
+        if ( input::is_pressed(input::key_left) ) {
+            --s_game_state.x;
+        }
+
+        if ( input::is_pressed(input::key_right) ) {
+            ++s_game_state.x;
+        }
+
+        if ( input::is_pressed(input::key_up) ) {
+            --s_game_state.y;
+        }
+
+        if ( input::is_pressed(input::key_down) ) {
+            ++s_game_state.y;
+        }
+
         gfx::m3_plot(
-            rnd_u32(gfx::screen_width),
-            rnd_u32(gfx::screen_height),
+            s_game_state.x,
+            s_game_state.y,
             make_rgb15(rnd_u32(32u), rnd_u32(32u), rnd_u32(32u)));
+
+        gfx::vsync();
     }
 }
