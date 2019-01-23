@@ -34,4 +34,3 @@ endif()
 #
 
 add_subdirectory(game)
-add_subdirectory(tests)
