@@ -4,10 +4,4 @@
 # Copyright (C) 2019 Matvey Cherevko
 # ******************************************************************************
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-cmake_minimum_required(VERSION 3.13)
-project(gba-game)
-
-add_subdirectory(game)
-add_subdirectory(tools)
+add_subdirectory(dummy_tool)

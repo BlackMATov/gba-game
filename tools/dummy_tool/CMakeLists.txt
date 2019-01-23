@@ -4,22 +4,18 @@
 # Copyright (C) 2019 Matvey Cherevko
 # ******************************************************************************
 
-include(setup_gba_toolchain)
+set(TOOL_NAME "dummy_tool")
 
-set(GAME_NAME "game")
-
-file(GLOB_RECURSE GAME_SOURCES
+file(GLOB TOOL_SOURCES
     sources/*.*)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES ${GAME_SOURCES})
+    FILES ${TOOL_SOURCES})
 
-add_executable(${GAME_NAME}
-    ${GAME_SOURCES})
+add_executable(${TOOL_NAME}
+    ${TOOL_SOURCES})
 
-set_target_properties(${GAME_NAME} PROPERTIES
+set_target_properties(${TOOL_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-
-add_gba_rom_target(${GAME_NAME})

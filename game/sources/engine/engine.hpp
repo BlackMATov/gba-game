@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace gbe
+namespace engine
 {
     using s8 = std::int8_t;
     using s16 = std::int16_t;
@@ -26,7 +26,7 @@ namespace gbe
     static_assert(sizeof(u32) == 4, "u32 sizeof check failed");
 }
 
-namespace gbe
+namespace engine
 {
     constexpr u16 make_rgb15(u32 r, u32 g, u32 b) noexcept {
         return static_cast<u16>(r | (g << 5) | (b << 10));
@@ -44,7 +44,7 @@ namespace gbe
     };
 }
 
-namespace gbe::raw
+namespace engine::raw
 {
     inline volatile u16* io16(std::size_t offset = 0u) noexcept {
         return reinterpret_cast<u16*>(0x04000000 + offset);
@@ -59,7 +59,7 @@ namespace gbe::raw
     }
 }
 
-namespace gbe::gfx
+namespace engine::gfx
 {
     // .------------------------------------.
     // | subject  | length         | cycles |
@@ -82,7 +82,7 @@ namespace gbe::gfx
     u32 vcount() noexcept;
 }
 
-namespace gbe::math
+namespace engine::math
 {
     template < typename T >
     inline T min(T l, T r) noexcept {
@@ -100,7 +100,7 @@ namespace gbe::math
     }
 }
 
-namespace gbe::core
+namespace engine::core
 {
     enum modes : u32 {
         mode_0 = 0x0000,
@@ -124,7 +124,7 @@ namespace gbe::core
     void change_layers(u32 layers) noexcept;
 }
 
-namespace gbe::input
+namespace engine::input
 {
     enum keys : u32 {
         key_a      = 0x0001,

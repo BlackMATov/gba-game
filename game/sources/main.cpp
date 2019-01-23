@@ -1,5 +1,11 @@
-#include "gbe.hpp"
-using namespace gbe;
+/*******************************************************************************
+ * This file is part of the "https://github.com/BlackMATov/gba-game"
+ * For conditions of distribution and use, see copyright notice in LICENSE.md
+ * Copyright (C) 2019 Matvey Cherevko
+ ******************************************************************************/
+
+#include "engine/engine.hpp"
+using namespace engine;
 
 namespace
 {

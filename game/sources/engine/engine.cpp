@@ -6,8 +6,8 @@
 
 #include <cassert>
 
-#include "gbe.hpp"
-using namespace gbe;
+#include "engine.hpp"
+using namespace engine;
 
 namespace
 {
@@ -25,7 +25,7 @@ namespace
     inline volatile u32& s_reg_dispstat = *(raw::io32(0x0004));
 }
 
-namespace gbe::gfx
+namespace engine::gfx
 {
     void m3_plot(u32 x, u32 y, u16 c) noexcept {
         assert(s_core_state.mode == core::mode_3);
@@ -43,7 +43,7 @@ namespace gbe::gfx
     }
 }
 
-namespace gbe::core
+namespace engine::core
 {
     void initialize() noexcept {
         change_mode(s_core_state.mode);
@@ -61,7 +61,7 @@ namespace gbe::core
     }
 }
 
-namespace gbe::input
+namespace engine::input
 {
     void poll() noexcept {
         volatile u16& reg_key_input = *(raw::io16(0x0130));

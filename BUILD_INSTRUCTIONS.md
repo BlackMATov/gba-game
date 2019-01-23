@@ -28,7 +28,7 @@ $ cmake --build .
 
 ```bash
 $ cd your_game_build_directory
-$ mgba game/gba-game.gba
+$ mgba game/game.gba
 ```
 
 ## * Links
