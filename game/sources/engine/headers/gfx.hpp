@@ -8,6 +8,18 @@
 
 #include "base.hpp"
 
+// .------------------------------------.
+// | subject  | length         | cycles |
+// |------------------------------------|
+// | pixel    | 1              | 4      |
+// | HDraw    | 240px          | 960    |
+// | HBlank   | 68px           | 272    |
+// | scanline | Hdraw + Hbl    | 1232   |
+// | VDraw    | 160 * scanline | 197120 |
+// | VBlank   | 68 * scanline  | 83776  |
+// | refresh  | VDraw + Vbl    | 280896 |
+// `------------------------------------`
+
 namespace engine::gfx
 {
     inline u32 screen_width = 240u;

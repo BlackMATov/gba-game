@@ -33,6 +33,7 @@ int main() noexcept
     core::initialize(core::mode_3, core::layer_bg2);
 
     while(true) {
+        gfx::vsync();
         input::poll();
 
         if ( input::is_pressed(input::key_a) ) {
@@ -66,7 +67,5 @@ int main() noexcept
             static_cast<u32>(s_game_state.x),
             static_cast<u32>(s_game_state.y),
             make_rgb15(rnd_u32(32u), rnd_u32(32u), rnd_u32(32u)));
-
-        gfx::vsync();
     }
 }
