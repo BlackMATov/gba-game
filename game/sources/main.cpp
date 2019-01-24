@@ -4,7 +4,7 @@
  * Copyright (C) 2019 Matvey Cherevko
  ******************************************************************************/
 
-#include "engine/engine.hpp"
+#include "engine/headers/all.hpp"
 using namespace engine;
 
 namespace
@@ -23,17 +23,22 @@ namespace
     }
 
     struct game_state_t {
-        u32 x = 0u;
-        u32 y = 0u;
+        s32 x = gfx::screen_width >> 1;
+        s32 y = gfx::screen_height >> 1;
     } s_game_state;
 }
 
 int main() noexcept
 {
-    core::initialize();
+    core::initialize(core::mode_3, core::layer_bg2);
 
     while(true) {
         input::poll();
+
+        if ( input::is_pressed(input::key_a) ) {
+            s_game_state.x += rnd_u32(3) - 1;
+            s_game_state.y += rnd_u32(3) - 1;
+        }
 
         if ( input::is_pressed(input::key_left) ) {
             --s_game_state.x;
@@ -51,9 +56,15 @@ int main() noexcept
             ++s_game_state.y;
         }
 
+        s_game_state.x = math::clamp<s32>(s_game_state.x,
+            0, static_cast<s32>(gfx::screen_width) - 1);
+
+        s_game_state.y = math::clamp<s32>(s_game_state.y,
+            0, static_cast<s32>(gfx::screen_height) - 1);
+
         gfx::m3_plot(
-            s_game_state.x,
-            s_game_state.y,
+            static_cast<u32>(s_game_state.x),
+            static_cast<u32>(s_game_state.y),
             make_rgb15(rnd_u32(32u), rnd_u32(32u), rnd_u32(32u)));
 
         gfx::vsync();
