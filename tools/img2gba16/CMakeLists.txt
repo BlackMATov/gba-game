@@ -4,7 +4,10 @@
 # Copyright (C) 2019 Matvey Cherevko
 # ******************************************************************************
 
-set(TOOL_NAME "dummy_tool")
+find_package(Boost REQUIRED COMPONENTS
+    filesystem program_options)
+
+set(TOOL_NAME "img2gba16")
 
 file(GLOB TOOL_SOURCES
     sources/*.*)
@@ -19,3 +22,10 @@ set_target_properties(${TOOL_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
+
+target_link_libraries(${TOOL_NAME}
+    Boost::filesystem
+    Boost::program_options)
+
+target_include_directories(${TOOL_NAME}
+    PRIVATE ../3rdparty)

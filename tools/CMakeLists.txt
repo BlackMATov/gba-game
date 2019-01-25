@@ -4,4 +4,4 @@
 # Copyright (C) 2019 Matvey Cherevko
 # ******************************************************************************
 
-add_subdirectory(dummy_tool)
+add_subdirectory(img2gba16)
