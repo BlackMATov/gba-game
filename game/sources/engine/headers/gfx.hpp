@@ -22,10 +22,14 @@
 
 namespace engine::gfx
 {
-    inline u32 screen_width = 240u;
-    inline u32 screen_height = 160u;
+    inline constexpr u32 screen_width = 240u;
+    inline constexpr u32 screen_height = 160u;
 
-    void m3_plot(u32 x, u32 y, u16 c) noexcept;
+    inline constexpr s32 screen_width_s = 240;
+    inline constexpr s32 screen_height_s = 160;
+
+    void m3_plot(s32 x, s32 y, u16 c) noexcept;
+    void m3_image(s32 x, s32 y, const u16* rgb15, u16 w, u16 h) noexcept;
 
     void vsync() noexcept;
     u32 vcount() noexcept;

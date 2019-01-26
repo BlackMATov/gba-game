@@ -15,7 +15,7 @@ namespace
 
 namespace engine::core
 {
-    void initialize(mode mode, layer layers) noexcept {
+    void initialize(mode mode, u16 layers) noexcept {
         volatile u16& dispcnt = mem::reg_dispcnt_ref();
         dispcnt = mode | layers;
     }
@@ -25,7 +25,7 @@ namespace engine::core
         dispcnt = (dispcnt & ~GBAE_DISPCNT_MODE_MASK) | mode;
     }
 
-    void change_layers(layer layers) noexcept {
+    void change_layers(u16 layers) noexcept {
         volatile u16& dispcnt = mem::reg_dispcnt_ref();
         dispcnt = (dispcnt & ~GBAE_DISPCNT_LAYERS_MASK) | layers;
     }
@@ -35,8 +35,8 @@ namespace engine::core
             mem::reg_dispcnt_ref() & GBAE_DISPCNT_MODE_MASK);
     }
 
-    layer current_layers() noexcept {
-        return static_cast<layer>(
+    u16 current_layers() noexcept {
+        return static_cast<u16>(
             mem::reg_dispcnt_ref() & GBAE_DISPCNT_LAYERS_MASK);
     }
 }

@@ -8,6 +8,14 @@
 
 #include "base.hpp"
 
+// .------------------------------.
+// | mode | BG0 | BG1 | BG2 | BG3 |
+// |------------------------------|
+// |  0   | reg | reg | reg | reg |
+// |  1   | reg | reg | aff |  -  |
+// |  2   |  -  |  -  | aff | aff |
+// `------------------------------`
+
 namespace engine::core
 {
     enum mode : u16 {
@@ -27,11 +35,11 @@ namespace engine::core
         layer_obj = 0x1000
     };
 
-    void initialize(mode mode, layer layers) noexcept;
+    void initialize(mode mode, u16 layers) noexcept;
 
     void change_mode(mode mode) noexcept;
-    void change_layers(layer layers) noexcept;
+    void change_layers(u16 layers) noexcept;
 
     mode current_mode() noexcept;
-    layer current_layers() noexcept;
+    u16 current_layers() noexcept;
 }

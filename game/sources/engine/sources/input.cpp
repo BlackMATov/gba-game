@@ -20,24 +20,24 @@ namespace
 namespace engine::input
 {
     void poll() noexcept {
-        volatile u16& reg_key_input = *(mem::reg_ptr<u16>(0x0130));
+        u16 new_keys = ~mem::reg_input_ref() & GBAE_INPUT_MASK;
         s_input_state.prev_keys = s_input_state.curr_keys;
-        s_input_state.curr_keys = ~reg_key_input & 0x03FF;
+        s_input_state.curr_keys = new_keys;
     }
 
-    bool is_pressed(key keys) noexcept {
+    bool is_pressed(u16 keys) noexcept {
         return s_input_state.curr_keys & keys;
     }
 
-    bool is_released(key keys) noexcept {
+    bool is_released(u16 keys) noexcept {
         return ~s_input_state.curr_keys & keys;
     }
 
-    bool is_just_pressed(key keys) noexcept {
+    bool is_just_pressed(u16 keys) noexcept {
         return (s_input_state.curr_keys & ~s_input_state.prev_keys) & keys;
     }
 
-    bool is_just_released(key keys) noexcept {
+    bool is_just_released(u16 keys) noexcept {
         return (~s_input_state.curr_keys & s_input_state.prev_keys) & keys;
     }
 }

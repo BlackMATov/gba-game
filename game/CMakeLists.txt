@@ -9,7 +9,8 @@ include(setup_gba_toolchain)
 set(GAME_NAME "game")
 
 file(GLOB_RECURSE GAME_SOURCES
-    sources/*.*)
+    sources/*.hpp
+    sources/*.cpp)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
     FILES ${GAME_SOURCES})

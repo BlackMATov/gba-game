@@ -25,9 +25,9 @@ namespace engine::input
 
     void poll() noexcept;
 
-    bool is_pressed(key keys) noexcept;
-    bool is_released(key keys) noexcept;
+    bool is_pressed(u16 keys) noexcept;
+    bool is_released(u16 keys) noexcept;
 
-    bool is_just_pressed(key keys) noexcept;
-    bool is_just_released(key keys) noexcept;
+    bool is_just_pressed(u16 keys) noexcept;
+    bool is_just_released(u16 keys) noexcept;
 }
