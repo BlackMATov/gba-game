@@ -25,3 +25,15 @@ namespace engine::math
         return min(max(v, vmin), vmax);
     }
 }
+
+namespace engine::math
+{
+    u32 rnd_seed() noexcept;
+    u32 rnd_seed(u32 s) noexcept;
+
+    // range: (0, r>
+    u32 rnd_u32(u32 r) noexcept;
+
+    // range: (l, r>
+    u32 rnd_u32(u32 l, u32 r) noexcept;
+}
