@@ -8,18 +8,14 @@
 #include <cstdint>
 #include <cassert>
 
-#include <ios>
 #include <memory>
 #include <string>
-#include <iomanip>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
+#include <toolbox/toolbox.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
@@ -43,110 +39,61 @@ namespace
             << "Supported bitmap formats:\n  - .png\n  - .tga\n  - .bmp" << std::endl;
     }
 
-    using bitmap_data_uptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
-
     template < typename CharT, typename Traits >
-    std::size_t bitmap_data_to_stream(
-        std::uint32_t min_alpha,
-        const bitmap_data_uptr& data,
-        const std::size_t width,
-        const std::size_t height,
-        const std::size_t channels,
+    std::size_t palette_to_stream(
+        const toolbox::bitmap8p_t& bitmap8,
         std::basic_ostream<CharT, Traits>& ost)
     {
-        assert(width > 0 && height > 0);
-        assert(channels >= 1 && channels <= 4);
-        boost::io::ios_flags_saver ost_flags(ost);
-
         ost << "namespace {" << std::endl
             << "    __attribute__((section(\".ewram\")))" << std::endl
-            << "    const std::uint16_t EWRAM_raw_data[] = {" << std::endl;
+            << "    const std::uint16_t EWRAM_palette_raw_data[] = {" << std::endl;
 
-        std::uint8_t* raw = data.get();
-        for ( std::size_t y = 0; y < height; ++y ) {
-            ost << "        ";
-            for ( std::size_t x = 0; x < width; ++x ) {
-                std::uint8_t r = 0, g = 0, b = 0, a = 0;
-                std::size_t i = y * width * channels + x * channels;
-                switch ( channels ) {
-                    case 1:
-                        r = raw[i + 0];
-                        g = raw[i + 0];
-                        b = raw[i + 0];
-                        a = 255u;
-                        break;
-                    case 2:
-                        r = raw[i + 0];
-                        g = raw[i + 0];
-                        b = raw[i + 0];
-                        a = raw[i + 1];
-                        break;
-                    case 3:
-                        r = raw[i + 0];
-                        g = raw[i + 1];
-                        b = raw[i + 2];
-                        a = 255u;
-                        break;
-                    case 4:
-                        r = raw[i + 0];
-                        g = raw[i + 1];
-                        b = raw[i + 2];
-                        a = raw[i + 3];
-                        break;
-                    default:
-                        throw std::logic_error("internal error");
-                }
-
-                std::uint16_t c = a >= min_alpha
-                    ? static_cast<std::uint16_t>(
-                        ((r >> 3) <<  0) |
-                        ((g >> 3) <<  5) |
-                        ((b >> 3) << 10))
-                    : 0;
-
-                ost << std::hex
-                    << std::showbase
-                    << c;
-
-                if ( x < width - 1 || y < height - 1 ) {
-                    ost << ", ";
-                }
-            }
-            ost << std::endl;
-        }
+        toolbox::hex_data_to_stream(
+            bitmap8.palette,
+            ost,
+            "        ",
+            8) << std::endl;
 
         ost << "    };" << std::endl;
         ost << "}" << std::endl;
 
-        return width * height * sizeof(std::uint16_t);
+        return bitmap8.palette.size() * sizeof(std::uint16_t);
+    }
+
+    template < typename CharT, typename Traits >
+    std::size_t indices_to_stream(
+        const toolbox::bitmap8p_t& bitmap8,
+        std::basic_ostream<CharT, Traits>& ost)
+    {
+        ost << "namespace {" << std::endl
+            << "    __attribute__((section(\".ewram\")))" << std::endl
+            << "    const std::uint8_t EWRAM_indices_raw_data[] = {" << std::endl;
+
+        toolbox::hex_data_to_stream(
+            bitmap8.indices,
+            ost,
+            "        ",
+            bitmap8.width) << std::endl;
+
+        ost << "    };" << std::endl;
+        ost << "}" << std::endl;
+
+        return bitmap8.indices.size() * sizeof(std::uint8_t);
     }
 
     void process_bitmap(const fs::path& path, std::uint32_t min_alpha) {
         std::cout << "... bitmap processing: " << path << std::endl;
 
-        int width = 0, height = 0, channels = 0;
-        stbi_uc* bitmap_data_raw = stbi_load(path.c_str(), &width, &height, &channels, 0);
-        if ( !bitmap_data_raw ) {
-            throw std::logic_error(stbi_failure_reason());
-        }
-
-        bitmap_data_uptr bitmap_data(bitmap_data_raw, &stbi_image_free);
-
-        if ( width < 1 || height < 1 ) {
-            throw std::logic_error("unsupported bitmap size");
-        }
-
-        if ( channels < 1 || channels > 4 ) {
-            throw std::logic_error("unsupported bitmap format");
-        }
-
+        auto bitmap = toolbox::load_bitmap8p(
+            path.c_str(),
+            static_cast<std::uint8_t>(std::min(min_alpha, 255u)));
         std::string bitmap_id = path.stem().string();
 
         fs::path header_data_path = path;
-        header_data_path.concat(".data.hpp");
+        header_data_path.concat(".bitmap8p.hpp");
 
         fs::path source_data_path = path;
-        source_data_path.concat(".data.cpp");
+        source_data_path.concat(".bitmap8p.cpp");
 
         std::ofstream header_data_ost(header_data_path.c_str());
         std::ofstream source_data_ost(source_data_path.c_str());
@@ -162,9 +109,13 @@ namespace
                 << "#include <cstdint>" << std::endl
                 << "#include <cstddef>" << std::endl
                 << std::endl
-                << "namespace embedded_data {" << std::endl
-                << "    extern const std::uint16_t* " << bitmap_id.c_str() << ";" << std::endl
-                << "    extern const std::size_t " << bitmap_id.c_str() << "_bytes;" << std::endl
+                << "namespace embedded_bitmaps_8p {" << std::endl
+                << "    extern const std::uint16_t* " << bitmap_id.c_str() << "_palette;" << std::endl
+                << "    extern const std::size_t " << bitmap_id.c_str() << "_palette_bytes;" << std::endl
+
+                << "    extern const std::uint8_t* " << bitmap_id.c_str() << "_indices;" << std::endl
+                << "    extern const std::size_t " << bitmap_id.c_str() << "_indices_bytes;" << std::endl
+
                 << "    extern const std::uint16_t " << bitmap_id.c_str() << "_width;" << std::endl
                 << "    extern const std::uint16_t " << bitmap_id.c_str() << "_height;" << std::endl
                 << "}" << std::endl;
@@ -175,20 +126,20 @@ namespace
             ost << "#include " << header_data_path.filename() << "" << std::endl;
 
             ost << std::endl;
-            std::size_t bitmap_bytes = bitmap_data_to_stream(
-                min_alpha,
-                bitmap_data,
-                static_cast<std::size_t>(width),
-                static_cast<std::size_t>(height),
-                static_cast<std::size_t>(channels),
-                ost);
+            const std::size_t palette_bytes = palette_to_stream(bitmap, ost);
+            ost << std::endl;
+            const std::size_t indices_bytes = indices_to_stream(bitmap, ost);
             ost << std::endl;
 
-            ost << "namespace embedded_data {" << std::endl
-                << "    const std::uint16_t* " << bitmap_id.c_str() << " = EWRAM_raw_data;" << std::endl
-                << "    const std::size_t " << bitmap_id.c_str() << "_bytes = " << bitmap_bytes << ";" << std::endl
-                << "    const std::uint16_t " << bitmap_id.c_str() << "_width = " << width << ";" << std::endl
-                << "    const std::uint16_t " << bitmap_id.c_str() << "_height = " << height << ";" << std::endl
+            ost << "namespace embedded_bitmaps_8p {" << std::endl
+                << "    const std::uint16_t* " << bitmap_id.c_str() << "_palette = EWRAM_palette_raw_data;" << std::endl
+                << "    const std::size_t " << bitmap_id.c_str() << "_palette_bytes = " << palette_bytes << ";" << std::endl
+
+                << "    const std::uint8_t* " << bitmap_id.c_str() << "_indices = EWRAM_indices_raw_data;" << std::endl
+                << "    const std::size_t " << bitmap_id.c_str() << "_indices_bytes = " << indices_bytes << ";" << std::endl
+
+                << "    const std::uint16_t " << bitmap_id.c_str() << "_width = " << bitmap.width << ";" << std::endl
+                << "    const std::uint16_t " << bitmap_id.c_str() << "_height = " << bitmap.height << ";" << std::endl
                 << "}" << std::endl;
         }
 

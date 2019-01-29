@@ -7,16 +7,16 @@
 find_package(Boost REQUIRED COMPONENTS
     filesystem program_options)
 
-set(TOOL_NAME "img2gba16")
+set(TOOL_NAME "img2gba16b")
 
-file(GLOB TOOL_SOURCES
+file(GLOB_RECURSE TOOL_SOURCES
     sources/*.*)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
     FILES ${TOOL_SOURCES})
 
 add_executable(${TOOL_NAME}
-    ${TOOL_SOURCES})
+    ${TOOL_SOURCES} ${TOOLBOX_SOURCES})
 
 set_target_properties(${TOOL_NAME} PROPERTIES
     CXX_STANDARD 17
@@ -24,8 +24,6 @@ set_target_properties(${TOOL_NAME} PROPERTIES
     CXX_EXTENSIONS NO)
 
 target_link_libraries(${TOOL_NAME}
+    toolbox
     Boost::filesystem
     Boost::program_options)
-
-target_include_directories(${TOOL_NAME}
-    PRIVATE ../3rdparty)
